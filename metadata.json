@@ -1,0 +1,8 @@
+{
+  "name": "Dzikir & Do'a",
+  "description": "Aplikasi Dzikir Pagi, Dzikir Petang, Doa Harian, Bab Sholat, dan Asmaul Husna dengan fitur counter haptic, orientasi adaptif, dan kustomisasi lengkap.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
