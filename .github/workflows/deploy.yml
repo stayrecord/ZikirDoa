@@ -8,7 +8,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # <-- Ini wajib agar actions memiliki izin menulis ke branch gh-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v4
