@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
-import { AppSettings, OrientationLockMode, CounterAnimationMode, ThemeStyle } from '../types';
+import { AppSettings, ThemeStyle, ReminderItem } from '../types';
+import { ToggleSwitch } from './ToggleSwitch';
 import { 
-  ArrowLeft, Moon, Sun, Lock, Maximize2, Smartphone, 
-  Vibrate, Type, Check, AlertTriangle, Eye, ShieldCheck,
-  CheckCircle2, Sliders, Palette
+  ArrowLeft, Moon, Sun, Smartphone, Maximize2,
+  Vibrate, Type, Check, AlertTriangle, Eye,
+  CheckCircle2, Sliders, Palette, Bell, Clock, 
+  Volume2, FileSpreadsheet, RefreshCw, Sparkles 
 } from 'lucide-react';
+import { 
+  triggerNotification, 
+  requestNotificationPermission, 
+  getNotificationPermission,
+  playNotificationChime
+} from '../utils/reminderService';
+import { fetchFlyersFromGoogleSheets } from '../data/nasehatFlyers';
 
 interface SettingsViewProps {
   currentSettings: AppSettings;
@@ -20,6 +29,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [settings, setSettings] = useState<AppSettings>(currentSettings);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
+  const [sheetSyncStatus, setSheetSyncStatus] = useState<string | null>(null);
+  const [isSyncingSheet, setIsSyncingSheet] = useState(false);
+  const [notificationStatus, setNotificationStatus] = useState<string>(getNotificationPermission());
 
   // Check if there are unsaved modifications
   const isDirty = JSON.stringify(settings) !== JSON.stringify(currentSettings);
@@ -51,37 +63,89 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     onBack();
   };
 
+  // Test Notification & Chime
+  const handleTestNotification = async () => {
+    if (notificationStatus !== 'granted') {
+      const perm = await requestNotificationPermission();
+      setNotificationStatus(perm);
+    }
+    triggerNotification(
+      'Uji Pengingat Dzikir',
+      'Waktunya dzikir dan mengingat Allah Ta\'ala. Semoga berkah senantiasa menyertai.'
+    );
+  };
+
+  // Toggle Reminder item
+  const handleToggleReminder = (id: string, enabled: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      reminders: prev.reminders.map(r => r.id === id ? { ...r, enabled } : r)
+    }));
+  };
+
+  // Update Reminder time
+  const handleUpdateTime = (id: string, time: string) => {
+    setSettings(prev => ({
+      ...prev,
+      reminders: prev.reminders.map(r => r.id === id ? { ...r, time } : r)
+    }));
+  };
+
+  // Sync Google Spreadsheet
+  const handleSyncGoogleSheet = async () => {
+    if (!settings.googleSheetUrl.trim()) {
+      setSheetSyncStatus('Masukkan tautan Google Spreadsheet terlebih dahulu.');
+      return;
+    }
+    setIsSyncingSheet(true);
+    setSheetSyncStatus(null);
+    try {
+      const flyers = await fetchFlyersFromGoogleSheets(settings.googleSheetUrl);
+      setSheetSyncStatus(`Berhasil sinkronkan ${flyers.length} flyer nasehat!`);
+    } catch {
+      setSheetSyncStatus('Gagal memuat sheet. Pastikan spreadsheet dipublikasikan ke web (CSV).');
+    } finally {
+      setIsSyncingSheet(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 select-none overflow-hidden">
+    <div className={`flex flex-col h-full w-full select-none overflow-hidden ${
+      settings.themeStyle === 'retro'
+        ? 'bg-[#fbf7ee] dark:bg-[#1a1714] text-[#2c221a] dark:text-[#f3ede2]'
+        : 'bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100'
+    }`}>
       {/* ================= FIXED TOP HEADER ================= */}
-      <header className={`shrink-0 w-full z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-3 flex items-center justify-between shadow-xs ${
+      <header className={`shrink-0 w-full z-30 px-4 py-3 flex items-center justify-between shadow-xs ${
         settings.themeStyle === 'modern-glow'
-          ? 'border-b border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-          : settings.themeStyle === 'anime-flat'
-          ? 'border-b-2 border-slate-900 dark:border-white shadow-[0_2px_0px_#0f172a]'
-          : 'border-b border-slate-200 dark:border-slate-800'
+          ? 'bg-slate-900/95 border-b border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)] text-white'
+          : settings.themeStyle === 'retro'
+          ? 'bg-[#f4ebd0]/95 dark:bg-[#231d17]/95 border-b-2 border-[#8c502b] dark:border-[#d97706]'
+          : 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800'
       }`}>
         <div className="flex items-center gap-2">
           <button
             onClick={handleBackPress}
-            className={`p-1.5 -ml-1 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95 ${
-              settings.themeStyle === 'anime-flat'
-                ? 'border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 shadow-[2px_2px_0px_#0f172a] dark:shadow-[2px_2px_0px_#38bdf8]'
+            className={`p-1.5 -ml-1 rounded-xl transition-all active:scale-95 ${
+              settings.themeStyle === 'retro'
+                ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#fbf7ee] dark:bg-[#2e261f] text-[#8c502b] dark:text-[#fcd34d] shadow-[2px_2px_0px_#8c502b]'
                 : settings.themeStyle === 'modern-glow'
                 ? 'border border-cyan-400/40 bg-slate-800/80 text-cyan-300 hover:border-cyan-400'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
             title="Kembali"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              <Sliders className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="text-sm font-bold flex items-center gap-1.5">
+              <Sliders className={`w-4 h-4 ${
+                settings.themeStyle === 'retro' ? 'text-[#8c502b] dark:text-[#fcd34d]' : 'text-emerald-600 dark:text-emerald-400'
+              }`} />
               Setelan Aplikasi
             </h2>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400">
-              Konfigurasi tema gaya, tampilan &amp; fitur dzikir
+            <p className="text-[10px] opacity-75">
+              Tema retro, pengingat dzikir &amp; opsi aplikasi
             </p>
           </div>
         </div>
@@ -95,14 +159,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
       {/* Main Settings Body (Hanya Tengah yang Scroll) */}
       <main className="flex-1 min-h-0 overflow-y-auto px-4 py-4 pb-28 space-y-5 max-w-xl mx-auto w-full text-xs">
-        {/* GRUP 0: PILIHAN GAYA TEMA (KLASIK ISLAMI, MODERN GLOW, ANIME FLAT) */}
+        {/* GRUP 0: PILIHAN GAYA TEMA (KLASIK, MODERN GLOW, RETRO) */}
         <section className="space-y-2.5">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+            <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+              settings.themeStyle === 'retro' ? 'text-[#8c502b] dark:text-[#fcd34d]' : 'text-emerald-700 dark:text-emerald-400'
+            }`}>
               <Palette className="w-3.5 h-3.5" />
-              Gaya Desain / Tema Visual
+              Gaya Desain &amp; Tema Visual
             </h3>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+            <span className="text-[10px] opacity-70 font-mono">
               3 Pilihan
             </span>
           </div>
@@ -115,13 +181,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               className={`relative p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between ${
                 settings.themeStyle === 'classic'
                   ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100 ring-2 ring-emerald-500/30 shadow-xs'
-                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-slate-800 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 text-slate-800 dark:text-slate-200 hover:border-slate-300'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
-                    Bawaan Aktif
+                    Klasik
                   </span>
                   {settings.themeStyle === 'classic' && (
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -129,7 +195,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </div>
                 <h4 className="text-xs sm:text-sm font-bold">Klasik Islami</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
-                  Desain minimalis islami dengan warna zamrud elegan &amp; aksen lembut.
+                  Minimalis bersih dengan warna zamrud menenangkan.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center gap-1.5">
@@ -160,7 +226,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </div>
                 <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Modern Glow</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-300 mt-1 leading-snug">
-                  Tepi tombol bercahaya neon cyan &amp; emerald dengan aura futuristik.
+                  Tepi tombol bercahaya neon cyan &amp; aksen futuristik.
                 </p>
               </div>
               <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center gap-1.5">
@@ -170,43 +236,158 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
             </button>
 
-            {/* 3. Anime Flat */}
+            {/* 3. Retro Vintage (Baru) */}
             <button
               type="button"
-              onClick={() => setSettings(s => ({ ...s, themeStyle: 'anime-flat' }))}
-              className={`relative p-3.5 rounded-2xl text-left transition-all flex flex-col justify-between border-2 border-slate-900 dark:border-white ${
-                settings.themeStyle === 'anime-flat'
-                  ? 'bg-sky-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-[3.5px_3.5px_0px_0px_#0f172a] dark:shadow-[3.5px_3.5px_0px_0px_#38bdf8]'
-                  : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 shadow-[2px_2px_0px_0px_#0f172a] dark:shadow-[2px_2px_0px_0px_#38bdf8] hover:shadow-[3px_3px_0px_0px_#0f172a]'
+              onClick={() => setSettings(s => ({ ...s, themeStyle: 'retro' }))}
+              className={`relative p-3.5 rounded-2xl text-left transition-all flex flex-col justify-between border-2 ${
+                settings.themeStyle === 'retro'
+                  ? 'bg-[#f4ebd0] dark:bg-[#28211a] border-[#8c502b] dark:border-[#d97706] text-[#2c221a] dark:text-[#f3ede2] shadow-[3.5px_3.5px_0px_#8c502b] dark:shadow-[3.5px_3.5px_0px_#d97706]'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:border-[#8c502b]'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber-300 text-slate-900 border border-slate-900 uppercase">
-                    Anime Flat
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#ebd7b2] dark:bg-[#423326] text-[#8c502b] dark:text-[#fcd34d] border border-[#8c502b] dark:border-[#d97706] uppercase">
+                    Retro
                   </span>
-                  {settings.themeStyle === 'anime-flat' && (
-                    <CheckCircle2 className="w-4 h-4 text-slate-900 dark:text-white" />
+                  {settings.themeStyle === 'retro' && (
+                    <CheckCircle2 className="w-4 h-4 text-[#8c502b] dark:text-[#fcd34d]" />
                   )}
                 </div>
-                <h4 className="text-xs sm:text-sm font-black uppercase tracking-tight">Anime Flat</h4>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-snug">
-                  Gaya datar komik 2D, garis tepi tegas tebal 2px &amp; bayangan solid tanpa karakter.
+                <h4 className="text-xs sm:text-sm font-bold uppercase tracking-tight">Retro Vintage</h4>
+                <p className="text-[11px] opacity-80 mt-1 leading-snug">
+                  Nuansa hangat kertas perkamen 90-an, aksen terracotta &amp; bayangan taktil vintage.
                 </p>
               </div>
-              <div className="mt-3 pt-2 border-t-2 border-slate-900 dark:border-white/50 flex items-center gap-1.5">
-                <div className="w-3.5 h-3.5 bg-sky-400 border border-slate-900"></div>
-                <div className="w-3.5 h-3.5 bg-rose-400 border border-slate-900"></div>
-                <span className="text-[10px] font-bold text-slate-900 dark:text-slate-200 uppercase">Cel-Shaded</span>
+              <div className="mt-3 pt-2 border-t border-[#8c502b]/30 flex items-center gap-1.5">
+                <div className="w-3.5 h-3.5 rounded bg-[#8c502b]"></div>
+                <div className="w-3.5 h-3.5 rounded bg-[#d97706]"></div>
+                <span className="text-[10px] font-bold opacity-80 uppercase">Parchment</span>
               </div>
             </button>
           </div>
         </section>
 
-        {/* GRUP 1: OPSI UMUM */}
+        {/* GRUP 1: FITUR PENGINGAT (REMINDER) */}
         <section className="space-y-2.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-1">
-            Opsi Umum
+          <div className="flex items-center justify-between px-1">
+            <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+              settings.themeStyle === 'retro' ? 'text-[#8c502b] dark:text-[#fcd34d]' : 'text-emerald-700 dark:text-emerald-400'
+            }`}>
+              <Bell className="w-3.5 h-3.5" />
+              Pengingat Waktu Dzikir (Reminder)
+            </h3>
+            <button
+              onClick={handleTestNotification}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all active:scale-95 ${
+                settings.themeStyle === 'retro'
+                  ? 'bg-[#ebd7b2] dark:bg-[#34281e] text-[#8c502b] dark:text-[#fcd34d] border border-[#8c502b] dark:border-[#d97706]'
+                  : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+              }`}
+            >
+              <Volume2 className="w-3 h-3" />
+              <span>Uji Notifikasi</span>
+            </button>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/90 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/80 overflow-hidden shadow-xs">
+            {/* Master Reminder Toggle */}
+            <div className="p-3.5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">Aktifkan Pengingat Dzikir</div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Notifikasi lonceng &amp; pesan saat waktu tiba</div>
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={settings.remindersEnabled}
+                onChange={(checked) => setSettings(s => ({ ...s, remindersEnabled: checked }))}
+                ariaLabel="Aktifkan pengingat dzikir"
+              />
+            </div>
+
+            {/* List individual reminder times */}
+            {settings.remindersEnabled && (
+              <div className="p-3.5 space-y-3 bg-slate-50/50 dark:bg-slate-950/30">
+                {settings.reminders.map((rem) => (
+                  <div key={rem.id} className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-slate-800 dark:text-slate-200 text-xs">{rem.title}</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{rem.subtitle}</div>
+                    </div>
+
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <input
+                          type="time"
+                          value={rem.time}
+                          onChange={(e) => handleUpdateTime(rem.id, e.target.value)}
+                          className="bg-transparent text-xs font-mono font-bold text-slate-800 dark:text-white focus:outline-none"
+                        />
+                      </div>
+                      <ToggleSwitch
+                        size="sm"
+                        checked={rem.enabled}
+                        onChange={(checked) => handleToggleReminder(rem.id, checked)}
+                        ariaLabel={`Aktifkan pengingat ${rem.title}`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* GRUP 2: KONEKSI GOOGLE SPREADSHEET (CAROUSEL NASEHAT) */}
+        <section className="space-y-2.5">
+          <h3 className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 px-1 ${
+            settings.themeStyle === 'retro' ? 'text-[#8c502b] dark:text-[#fcd34d]' : 'text-emerald-700 dark:text-emerald-400'
+          }`}>
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            Koneksi Google Spreadsheet (Flyer Nasehat)
+          </h3>
+          <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 space-y-3 shadow-xs">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              Tautkan link Google Spreadsheet yang dipublikasikan ke web (format CSV) untuk memperbarui konten flyer nasehat secara otomatis tanpa mengubah kode aplikasi.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="url"
+                value={settings.googleSheetUrl}
+                onChange={(e) => setSettings(s => ({ ...s, googleSheetUrl: e.target.value }))}
+                placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv"
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              />
+              <button
+                type="button"
+                onClick={handleSyncGoogleSheet}
+                disabled={isSyncingSheet}
+                className="px-4 py-2 rounded-xl font-bold text-xs bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white flex items-center justify-center gap-1.5 shrink-0 transition-all active:scale-95 shadow-xs"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncingSheet ? 'animate-spin' : ''}`} />
+                <span>{isSyncingSheet ? 'Sinkron...' : 'Sinkronkan'}</span>
+              </button>
+            </div>
+            {sheetSyncStatus && (
+              <p className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pt-1">
+                {sheetSyncStatus}
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* GRUP 3: OPSI TAMPILAN & PERANGKAT (KUNCI ORIENTASI TELAH DIHAPUS) */}
+        <section className="space-y-2.5">
+          <h3 className={`text-xs font-bold uppercase tracking-wider px-1 ${
+            settings.themeStyle === 'retro' ? 'text-[#8c502b] dark:text-[#fcd34d]' : 'text-emerald-700 dark:text-emerald-400'
+          }`}>
+            Opsi Tampilan &amp; Layar
           </h3>
           <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/90 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/80 overflow-hidden shadow-xs">
             {/* Mode Gelap / Terang */}
@@ -255,15 +436,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">Cegah layar mati otomatis saat berdzikir</div>
                 </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.keepAwake}
-                  onChange={(e) => setSettings(s => ({ ...s, keepAwake: e.target.checked }))}
-                  className="sr-only peer"
-                />
-                <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
+              <ToggleSwitch
+                checked={settings.keepAwake}
+                onChange={(checked) => setSettings(s => ({ ...s, keepAwake: checked }))}
+                ariaLabel="Layar selalu menyala"
+              />
             </div>
 
             {/* Mode Full Layar */}
@@ -277,55 +454,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">Sembunyikan bilah browser saat aktif</div>
                 </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.fullscreen}
-                  onChange={(e) => setSettings(s => ({ ...s, fullscreen: e.target.checked }))}
-                  className="sr-only peer"
-                />
-                <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
-            </div>
-
-            {/* Kunci Orientasi Layar */}
-            <div className="p-3.5 space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-amber-500 shrink-0">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-800 dark:text-slate-200">Kunci Orientasi Layar</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">Pilih orientasi layar perangkat Anda</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                {[
-                  { id: 'auto', label: 'Otomatis' },
-                  { id: 'portrait', label: 'Potret' },
-                  { id: 'landscape', label: 'Lanskap' }
-                ].map((o) => (
-                  <button
-                    key={o.id}
-                    type="button"
-                    onClick={() => setSettings(s => ({ ...s, orientationLock: o.id as OrientationLockMode }))}
-                    className={`py-2 px-1 rounded-xl text-center border transition-all text-xs ${
-                      settings.orientationLock === o.id
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 font-bold'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </div>
+              <ToggleSwitch
+                checked={settings.fullscreen}
+                onChange={(checked) => setSettings(s => ({ ...s, fullscreen: checked }))}
+                ariaLabel="Mode layar penuh"
+              />
             </div>
           </div>
         </section>
 
-        {/* GRUP 2: OPSI DZIKIR PAGI & PETANG */}
+        {/* GRUP 4: OPSI DZIKIR PAGI & PETANG */}
         <section className="space-y-2.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-1">
+          <h3 className={`text-xs font-bold uppercase tracking-wider px-1 ${
+            settings.themeStyle === 'retro' ? 'text-[#8c502b] dark:text-[#fcd34d]' : 'text-emerald-700 dark:text-emerald-400'
+          }`}>
             Opsi Dzikir Pagi &amp; Petang
           </h3>
           <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/90 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800/80 overflow-hidden shadow-xs">
@@ -335,18 +477,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <div className="font-semibold text-slate-800 dark:text-slate-200">Tombol Counter Dzikir</div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">Tampilkan tombol hitung pada dzikir berulang</div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.counterEnabled}
-                  onChange={(e) => setSettings(s => ({ ...s, counterEnabled: e.target.checked }))}
-                  className="sr-only peer"
-                />
-                <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
+              <ToggleSwitch
+                checked={settings.counterEnabled}
+                onChange={(checked) => setSettings(s => ({ ...s, counterEnabled: checked }))}
+                ariaLabel="Tombol counter dzikir"
+              />
             </div>
 
-            {/* Bergetar atau tidak + durasi slider */}
+            {/* Efek Getar Taktil */}
             <div className="p-3.5 space-y-2.5">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
@@ -356,15 +494,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     <div className="text-[11px] text-slate-500 dark:text-slate-400">Getar saat tombol counter ditekan</div>
                   </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.hapticEnabled}
-                    onChange={(e) => setSettings(s => ({ ...s, hapticEnabled: e.target.checked }))}
-                    className="sr-only peer"
-                  />
-                  <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
+                <ToggleSwitch
+                  checked={settings.hapticEnabled}
+                  onChange={(checked) => setSettings(s => ({ ...s, hapticEnabled: checked }))}
+                  ariaLabel="Efek getar taktil"
+                />
               </div>
 
               {settings.hapticEnabled && (
@@ -392,21 +526,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <div>
                   <div className="font-semibold text-slate-800 dark:text-slate-200">Tampilkan Teks Latin</div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Mematikan opsi ini membuat halaman termuat lebih cepat &amp; fokus
+                    Mematikan opsi ini membuat pembacaan lebih fokus
                   </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.showLatinDefault}
-                    onChange={(e) => setSettings(s => ({ ...s, showLatinDefault: e.target.checked }))}
-                    className="sr-only peer"
-                  />
-                  <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                </label>
+                <ToggleSwitch
+                  checked={settings.showLatinDefault}
+                  onChange={(checked) => setSettings(s => ({ ...s, showLatinDefault: checked }))}
+                  ariaLabel="Tampilkan teks latin"
+                />
               </div>
 
-              {/* Sub-option jika Latin diaktifkan */}
               {settings.showLatinDefault && (
                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-3 animate-in fade-in">
                   <div className="flex items-center gap-2">
@@ -415,11 +544,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       Langsung buka kartu Latin saat memuat halaman
                     </span>
                   </div>
-                  <input
-                    type="checkbox"
+                  <ToggleSwitch
+                    size="sm"
                     checked={settings.autoExpandLatin}
-                    onChange={(e) => setSettings(s => ({ ...s, autoExpandLatin: e.target.checked }))}
-                    className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700"
+                    onChange={(checked) => setSettings(s => ({ ...s, autoExpandLatin: checked }))}
+                    ariaLabel="Langsung buka kartu latin"
                   />
                 </div>
               )}
@@ -431,22 +560,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <div className="font-semibold text-slate-800 dark:text-slate-200">Langsung Buka Sumber &amp; Dalil</div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">Otomatis buka penjelasan hadits pada kartu dzikir</div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.autoExpandDalil}
-                  onChange={(e) => setSettings(s => ({ ...s, autoExpandDalil: e.target.checked }))}
-                  className="sr-only peer"
-                />
-                <div className="w-10 h-5 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
+              <ToggleSwitch
+                checked={settings.autoExpandDalil}
+                onChange={(checked) => setSettings(s => ({ ...s, autoExpandDalil: checked }))}
+                ariaLabel="Langsung buka dalil"
+              />
             </div>
           </div>
         </section>
 
-        {/* GRUP 3: UKURAN FONT & ANIMASI */}
+        {/* GRUP 5: UKURAN FONT & TIPOGRAFI (ANIMASI TEKANAN TELAH DIHAPUS DARI SINI) */}
         <section className="space-y-2.5">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 px-1">
+          <h3 className={`text-xs font-bold uppercase tracking-wider px-1 ${
+            settings.themeStyle === 'retro' ? 'text-[#8c502b] dark:text-[#fcd34d]' : 'text-emerald-700 dark:text-emerald-400'
+          }`}>
             Ukuran Font &amp; Tipografi
           </h3>
           <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 space-y-4 shadow-xs">
@@ -497,43 +624,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 onChange={(e) => setSettings(s => ({ ...s, latinFontSize: Number(e.target.value) }))}
                 className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
               />
-              {/* Live Preview Latin */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 text-left space-y-1">
-                <p className="text-slate-800 dark:text-slate-300 italic" style={{ fontSize: `${settings.latinFontSize}px` }}>
+                <p className="italic" style={{ fontSize: `${settings.latinFontSize}px` }}>
                   "Subhanallah wa bihamdihi"
                 </p>
-                <p className="text-slate-500 dark:text-slate-400 text-xs" style={{ fontSize: `${Math.max(11, settings.latinFontSize - 2)}px` }}>
+                <p className="opacity-70 text-xs" style={{ fontSize: `${Math.max(11, settings.latinFontSize - 2)}px` }}>
                   Maha Suci Allah dan segala puji bagi-Nya.
                 </p>
-              </div>
-            </div>
-
-            {/* Pilihan 5 Animasi Counter */}
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-2">
-              <label className="font-semibold text-slate-800 dark:text-slate-200 block">
-                Animasi Tekanan Counter (5 Pilihan)
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                {[
-                  { id: 'fluid', label: 'Fluid Wave' },
-                  { id: 'pulse', label: 'Pulse Bounce' },
-                  { id: 'spark', label: 'Glow Aura' },
-                  { id: 'squish', label: 'Haptic Squish' },
-                  { id: 'pop', label: 'Minimal Pop' }
-                ].map((a) => (
-                  <button
-                    key={a.id}
-                    type="button"
-                    onClick={() => setSettings(s => ({ ...s, counterAnimation: a.id as CounterAnimationMode }))}
-                    className={`py-2 px-2 rounded-xl text-center border text-[11px] transition-all ${
-                      settings.counterAnimation === a.id
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 font-bold'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    {a.label}
-                  </button>
-                ))}
               </div>
             </div>
           </div>
@@ -541,18 +638,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </main>
 
       {/* ================= FIXED BOTTOM APPLY BAR ================= */}
-      <footer className={`shrink-0 w-full mt-auto z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 flex items-center justify-between gap-3 max-w-xl mx-auto ${
+      <footer className={`shrink-0 w-full mt-auto z-30 p-4 flex items-center justify-between gap-3 max-w-xl mx-auto ${
         settings.themeStyle === 'modern-glow'
-          ? 'border-t border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-          : settings.themeStyle === 'anime-flat'
-          ? 'border-t-2 border-slate-900 dark:border-white shadow-[0_-2px_0px_#0f172a]'
-          : 'border-t border-slate-200 dark:border-slate-800 shadow-xs'
+          ? 'bg-slate-900/95 border-t border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+          : settings.themeStyle === 'retro'
+          ? 'bg-[#f4ebd0]/95 dark:bg-[#231d17]/95 border-t-2 border-[#8c502b] dark:border-[#d97706]'
+          : 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-xs'
       }`}>
         <button
           onClick={handleBackPress}
           className={`px-4 py-2.5 rounded-xl font-medium text-xs transition-all active:scale-95 ${
-            settings.themeStyle === 'anime-flat'
-              ? 'border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white shadow-[2px_2px_0px_#0f172a] dark:shadow-[2px_2px_0px_#38bdf8] uppercase font-bold'
+            settings.themeStyle === 'retro'
+              ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#fbf7ee] dark:bg-[#2e261f] text-[#8c502b] dark:text-[#fcd34d] font-bold shadow-[2px_2px_0px_#8c502b]'
               : settings.themeStyle === 'modern-glow'
               ? 'border border-cyan-400/40 bg-slate-800/80 text-cyan-300 hover:border-cyan-400'
               : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 shadow-xs'
@@ -563,12 +660,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
         <button
           onClick={handleApply}
-          className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 ${
+          className={`flex-1 py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-95 text-white ${
             settings.themeStyle === 'modern-glow'
-              ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 hover:opacity-95 text-white border border-cyan-300/50 shadow-[0_0_20px_rgba(6,182,212,0.5)]'
-              : settings.themeStyle === 'anime-flat'
-              ? 'bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-2 border-slate-900 shadow-[3px_3px_0px_#0f172a] dark:shadow-[3px_3px_0px_#38bdf8] uppercase font-black'
-              : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/20'
+              ? 'bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 hover:opacity-95 border border-cyan-300/50 shadow-[0_0_20px_rgba(6,182,212,0.5)]'
+              : settings.themeStyle === 'retro'
+              ? 'bg-[#8c502b] hover:bg-[#a05d33] border border-[#d97706] shadow-[3px_3px_0px_#d97706]'
+              : 'bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-900/20'
           }`}
         >
           {savedToast ? (

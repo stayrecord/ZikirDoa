@@ -160,41 +160,41 @@ export const DoaSholatView: React.FC<DoaSholatViewProps> = ({
     return (
       <div className="flex flex-col h-full w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-hidden">
         {/* Header */}
-        <header className={`sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-3 shadow-xs ${
+        <header className={`sticky top-0 z-30 px-4 py-3 flex items-center justify-between gap-3 shadow-xs ${
           settings.themeStyle === 'modern-glow'
-            ? 'border-b border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-            : settings.themeStyle === 'anime-flat'
-            ? 'border-b-2 border-slate-900 dark:border-white shadow-[0_2px_0px_#0f172a]'
-            : 'border-b border-slate-200 dark:border-slate-800'
+            ? 'bg-slate-900/95 border-b border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)] text-white'
+            : settings.themeStyle === 'retro'
+            ? 'bg-[#f4ebd0]/95 dark:bg-[#231d17]/95 border-b-2 border-[#8c502b] dark:border-[#d97706] text-[#2c221a] dark:text-[#f3ede2]'
+            : 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800'
         }`}>
           <div className="flex items-center gap-2">
             <button
               onClick={onBack}
-              className={`p-1.5 -ml-1 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95 ${
-                settings.themeStyle === 'anime-flat'
-                  ? 'border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 shadow-[2px_2px_0px_#0f172a]'
+              className={`p-1.5 -ml-1 rounded-xl transition-all active:scale-95 ${
+                settings.themeStyle === 'retro'
+                  ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#fbf7ee] dark:bg-[#2e261f] text-[#8c502b] dark:text-[#fcd34d] shadow-[2px_2px_0px_#8c502b]'
                   : settings.themeStyle === 'modern-glow'
                   ? 'border border-cyan-400/40 bg-slate-800/80 text-cyan-300'
-                  : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
               title="Kembali ke Beranda"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <h2 className="text-sm font-bold flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 {theme.name}
               </h2>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+              <p className="text-[10px] opacity-75">
                 Pilih judul untuk membuka halaman baca
               </p>
             </div>
           </div>
 
           <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full ${
-            settings.themeStyle === 'anime-flat'
-              ? 'border-2 border-slate-900 dark:border-white bg-amber-200 dark:bg-amber-900 text-slate-900 dark:text-white font-black'
+            settings.themeStyle === 'retro'
+              ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#ebd7b2] dark:bg-[#34281e] text-[#8c502b] dark:text-[#fcd34d] font-bold'
               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
           }`}>
             {filteredItems.length} Materi
@@ -265,22 +265,22 @@ export const DoaSholatView: React.FC<DoaSholatViewProps> = ({
       onTouchEnd={handleTouchEnd}
     >
       {/* ================= FIXED TOP HEADER (SELALU MENTOK KE ATAS) ================= */}
-      <header className={`shrink-0 w-full z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-2.5 shadow-xs flex items-center justify-between gap-2 ${
+      <header className={`shrink-0 w-full z-30 px-4 py-2.5 shadow-xs flex items-center justify-between gap-2 ${
         settings.themeStyle === 'modern-glow'
-          ? 'border-b border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-          : settings.themeStyle === 'anime-flat'
-          ? 'border-b-2 border-slate-900 dark:border-white shadow-[0_2px_0px_#0f172a]'
-          : 'border-b border-slate-200 dark:border-slate-800'
+          ? 'bg-slate-900/95 border-b border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)] text-white'
+          : settings.themeStyle === 'retro'
+          ? 'bg-[#f4ebd0]/95 dark:bg-[#231d17]/95 border-b-2 border-[#8c502b] dark:border-[#d97706] text-[#2c221a] dark:text-[#f3ede2]'
+          : 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800'
       }`}>
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={handleReaderBack}
-            className={`p-1.5 -ml-1 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95 ${
-              settings.themeStyle === 'anime-flat'
-                ? 'border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 shadow-[2px_2px_0px_#0f172a]'
+            className={`p-1.5 -ml-1 rounded-xl transition-all active:scale-95 ${
+              settings.themeStyle === 'retro'
+                ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#fbf7ee] dark:bg-[#2e261f] text-[#8c502b] dark:text-[#fcd34d] shadow-[2px_2px_0px_#8c502b]'
                 : settings.themeStyle === 'modern-glow'
                 ? 'border border-cyan-400/40 bg-slate-800/80 text-cyan-300'
-                : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
             title="Kembali ke Daftar"
           >
@@ -412,12 +412,12 @@ export const DoaSholatView: React.FC<DoaSholatViewProps> = ({
 
       {/* Horizontal Swipe Footer Navigation */}
       {/* ================= FIXED BOTTOM FOOTER (SELALU MENTOK DI BAWAH SCREEN) ================= */}
-      <footer className={`shrink-0 w-full mt-auto z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 py-2.5 flex items-center justify-between shadow-xs ${
+      <footer className={`shrink-0 w-full mt-auto z-30 px-4 py-2.5 flex items-center justify-between shadow-xs ${
         settings.themeStyle === 'modern-glow'
-          ? 'border-t border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
-          : settings.themeStyle === 'anime-flat'
-          ? 'border-t-2 border-slate-900 dark:border-white shadow-[0_-2px_0px_#0f172a]'
-          : 'border-t border-slate-200 dark:border-slate-800'
+          ? 'bg-slate-900/95 border-t border-cyan-500/40 shadow-[0_0_15px_rgba(6,182,212,0.15)] text-white'
+          : settings.themeStyle === 'retro'
+          ? 'bg-[#f4ebd0]/95 dark:bg-[#231d17]/95 border-t-2 border-[#8c502b] dark:border-[#d97706] text-[#2c221a] dark:text-[#f3ede2]'
+          : 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800'
       }`}>
         <button
           onClick={() => {
@@ -425,12 +425,12 @@ export const DoaSholatView: React.FC<DoaSholatViewProps> = ({
           }}
           disabled={activeItemIndex === 0}
           aria-label="Sebelumnya"
-          className={`p-2.5 rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all shadow-xs ${
-            settings.themeStyle === 'anime-flat'
-              ? 'border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 shadow-[2px_2px_0px_#0f172a] dark:shadow-[2px_2px_0px_#38bdf8]'
+          className={`p-2.5 rounded-xl disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all shadow-xs ${
+            settings.themeStyle === 'retro'
+              ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#fbf7ee] dark:bg-[#2e261f] text-[#8c502b] dark:text-[#fcd34d] shadow-[2px_2px_0px_#8c502b]'
               : settings.themeStyle === 'modern-glow'
               ? 'border border-cyan-400/40 bg-slate-800/80 text-cyan-300 hover:border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
-              : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
+              : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
           }`}
         >
           <ChevronLeft className="w-5 h-5" />
@@ -439,8 +439,8 @@ export const DoaSholatView: React.FC<DoaSholatViewProps> = ({
         <button
           onClick={handleReaderBack}
           className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-            settings.themeStyle === 'anime-flat'
-              ? 'border-2 border-slate-900 dark:border-white bg-amber-200 dark:bg-amber-900 text-slate-900 dark:text-white font-black'
+            settings.themeStyle === 'retro'
+              ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#ebd7b2] dark:bg-[#34281e] text-[#8c502b] dark:text-[#fcd34d] font-bold'
               : settings.themeStyle === 'modern-glow'
               ? 'text-cyan-300 hover:text-cyan-200'
               : 'text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -455,12 +455,12 @@ export const DoaSholatView: React.FC<DoaSholatViewProps> = ({
           }}
           disabled={activeItemIndex === items.length - 1}
           aria-label="Selanjutnya"
-          className={`p-2.5 rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all shadow-xs ${
-            settings.themeStyle === 'anime-flat'
-              ? 'border-2 border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 shadow-[2px_2px_0px_#0f172a] dark:shadow-[2px_2px_0px_#38bdf8]'
+          className={`p-2.5 rounded-xl disabled:opacity-30 disabled:pointer-events-none active:scale-95 transition-all shadow-xs ${
+            settings.themeStyle === 'retro'
+              ? 'border border-[#8c502b] dark:border-[#d97706] bg-[#fbf7ee] dark:bg-[#2e261f] text-[#8c502b] dark:text-[#fcd34d] shadow-[2px_2px_0px_#8c502b]'
               : settings.themeStyle === 'modern-glow'
               ? 'border border-cyan-400/40 bg-slate-800/80 text-cyan-300 hover:border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]'
-              : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700'
+              : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
           }`}
         >
           <ChevronRight className="w-5 h-5" />

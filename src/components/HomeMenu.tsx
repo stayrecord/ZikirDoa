@@ -37,7 +37,7 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
     iconBg: string;
     iconColor: string;
     glowBorder?: string;
-    animeBorder?: string;
+    retroBorder?: string;
     icon: React.ReactNode;
   }[] = [
     {
@@ -48,7 +48,7 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
       iconBg: 'bg-amber-100 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60',
       iconColor: 'text-amber-600 dark:text-amber-400',
       glowBorder: 'border-amber-400/50 dark:border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.22)] hover:shadow-[0_0_18px_rgba(245,158,11,0.45)]',
-      animeBorder: 'bg-amber-50 dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[3px_3px_0px_0px_#0f172a] dark:shadow-[3px_3px_0px_0px_#f59e0b]',
+      retroBorder: 'bg-[#fcf8ed] dark:bg-[#231d17] border-2 border-[#8c502b] dark:border-[#d97706] shadow-[3px_3px_0px_0px_#8c502b] dark:shadow-[3px_3px_0px_0px_#d97706]',
       icon: <Sun className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
@@ -59,7 +59,7 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
       iconBg: 'bg-indigo-100 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60',
       iconColor: 'text-indigo-600 dark:text-indigo-400',
       glowBorder: 'border-indigo-400/50 dark:border-indigo-400/60 shadow-[0_0_12px_rgba(99,102,241,0.22)] hover:shadow-[0_0_18px_rgba(99,102,241,0.45)]',
-      animeBorder: 'bg-indigo-50/50 dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[3px_3px_0px_0px_#0f172a] dark:shadow-[3px_3px_0px_0px_#818cf8]',
+      retroBorder: 'bg-[#fcf8ed] dark:bg-[#231d17] border-2 border-[#8c502b] dark:border-[#d97706] shadow-[3px_3px_0px_0px_#8c502b] dark:shadow-[3px_3px_0px_0px_#d97706]',
       icon: <Moon className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
@@ -70,7 +70,7 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
       iconBg: 'bg-emerald-100 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60',
       iconColor: 'text-emerald-600 dark:text-emerald-400',
       glowBorder: 'border-emerald-400/50 dark:border-emerald-400/60 shadow-[0_0_12px_rgba(16,185,129,0.22)] hover:shadow-[0_0_18px_rgba(16,185,129,0.45)]',
-      animeBorder: 'bg-emerald-50/50 dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[3px_3px_0px_0px_#0f172a] dark:shadow-[3px_3px_0px_0px_#34d399]',
+      retroBorder: 'bg-[#fcf8ed] dark:bg-[#231d17] border-2 border-[#8c502b] dark:border-[#d97706] shadow-[3px_3px_0px_0px_#8c502b] dark:shadow-[3px_3px_0px_0px_#d97706]',
       icon: <MosqueDomeIcon />
     },
     {
@@ -81,18 +81,18 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
       iconBg: 'bg-teal-100 dark:bg-teal-950/50 border border-teal-200 dark:border-teal-800/60',
       iconColor: 'text-teal-600 dark:text-teal-400',
       glowBorder: 'border-teal-400/50 dark:border-teal-400/60 shadow-[0_0_12px_rgba(20,184,166,0.22)] hover:shadow-[0_0_18px_rgba(20,184,166,0.45)]',
-      animeBorder: 'bg-teal-50/50 dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[3px_3px_0px_0px_#0f172a] dark:shadow-[3px_3px_0px_0px_#2dd4bf]',
+      retroBorder: 'bg-[#fcf8ed] dark:bg-[#231d17] border-2 border-[#8c502b] dark:border-[#d97706] shadow-[3px_3px_0px_0px_#8c502b] dark:shadow-[3px_3px_0px_0px_#d97706]',
       icon: <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
     },
     {
       id: 'setelan',
       title: 'Setelan Aplikasi',
-      subtitle: 'Ubah gaya tema, font & fitur dzikir',
+      subtitle: 'Ubah tema retro, reminder & opsi dzikir',
       countTag: 'Kustom',
       iconBg: 'bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700',
       iconColor: 'text-slate-600 dark:text-slate-300',
       glowBorder: 'border-cyan-400/50 dark:border-cyan-400/60 shadow-[0_0_12px_rgba(6,182,212,0.22)] hover:shadow-[0_0_18px_rgba(6,182,212,0.45)]',
-      animeBorder: 'bg-slate-50 dark:bg-slate-900 border-2 border-slate-900 dark:border-white shadow-[3px_3px_0px_0px_#0f172a] dark:shadow-[3px_3px_0px_0px_#38bdf8]',
+      retroBorder: 'bg-[#fcf8ed] dark:bg-[#231d17] border-2 border-[#8c502b] dark:border-[#d97706] shadow-[3px_3px_0px_0px_#8c502b] dark:shadow-[3px_3px_0px_0px_#d97706]',
       icon: <SlidersHorizontal className="w-4 h-4 sm:w-5 sm:h-5" />
     }
   ];
@@ -103,8 +103,8 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
         let cardStyle = '';
         if (themeStyle === 'modern-glow') {
           cardStyle = `bg-slate-900/80 dark:bg-slate-950/80 backdrop-blur-md border ${item.glowBorder} text-white`;
-        } else if (themeStyle === 'anime-flat') {
-          cardStyle = `${item.animeBorder} hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none`;
+        } else if (themeStyle === 'retro') {
+          cardStyle = `${item.retroBorder} text-[#2c221a] dark:text-[#f3ede2] hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none`;
         } else {
           // Classic
           cardStyle = 'bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs shadow-xs';
@@ -119,7 +119,7 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
             {/* Left Icon and Title */}
             <div className="flex items-center gap-3 min-w-0">
               <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${item.iconBg} ${item.iconColor} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-150 ${
-                themeStyle === 'anime-flat' ? 'border-2 border-slate-900 dark:border-white' : ''
+                themeStyle === 'retro' ? 'border border-[#8c502b] dark:border-[#d97706]' : ''
               }`}>
                 {item.icon}
               </div>
@@ -129,8 +129,8 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
                   <h3 className={`text-xs sm:text-sm font-bold tracking-tight truncate ${
                     themeStyle === 'modern-glow' 
                       ? 'text-white group-hover:text-cyan-300' 
-                      : themeStyle === 'anime-flat' 
-                      ? 'text-slate-900 dark:text-white font-extrabold uppercase' 
+                      : themeStyle === 'retro' 
+                      ? 'text-[#2c221a] dark:text-[#f3ede2] font-black' 
                       : 'text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
                   }`}>
                     {item.title}
@@ -146,8 +146,8 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
             <div className="flex items-center gap-1.5 shrink-0">
               {item.countTag && (
                 <span className={`text-[10px] font-medium hidden xs:inline ${
-                  themeStyle === 'anime-flat'
-                    ? 'font-bold uppercase px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-900 dark:border-white'
+                  themeStyle === 'retro'
+                    ? 'font-bold px-1.5 py-0.5 rounded bg-[#f4ebd0] dark:bg-[#322920] text-[#8c502b] dark:text-[#fcd34d] border border-[#8c502b] dark:border-[#d97706]'
                     : 'text-slate-400 dark:text-slate-500'
                 }`}>
                   {item.countTag}
@@ -156,8 +156,8 @@ export const HomeMenu: React.FC<HomeMenuProps> = ({
               <div className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
                 themeStyle === 'modern-glow'
                   ? 'text-cyan-300/80 group-hover:text-cyan-200 bg-cyan-950/40 border border-cyan-500/30'
-                  : themeStyle === 'anime-flat'
-                  ? 'text-slate-900 dark:text-white bg-slate-200 dark:bg-slate-800 border border-slate-900 dark:border-white'
+                  : themeStyle === 'retro'
+                  ? 'text-[#8c502b] dark:text-[#fcd34d] bg-[#f4ebd0] dark:bg-[#322920] border border-[#8c502b] dark:border-[#d97706]'
                   : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200 bg-slate-100 dark:bg-slate-800/80'
               }`}>
                 <ChevronRight className="w-3.5 h-3.5" />

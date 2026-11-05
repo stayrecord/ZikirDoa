@@ -24,26 +24,31 @@ export interface AsmaulHusnaItem {
   arti: string;
 }
 
-export interface CarouselSlide {
+export interface NasehatFlyer {
+  id: string;
+  title: string;
+  imageUrl: string;
+  content: string; // Hadits / dalil & penjelasan
+  source?: string;
+  badge?: string;
+}
+
+export interface ReminderItem {
   id: string;
   title: string;
   subtitle: string;
-  badge?: string;
-  imageUrl?: string;
-  bgGradient: string;
-  linkPage?: 'pagi' | 'petang' | 'doa' | 'sholat';
+  time: string; // "05:30" (24h format)
+  enabled: boolean;
 }
 
 export type CounterAnimationMode = 'fluid' | 'pulse' | 'spark' | 'squish' | 'pop';
 export type CounterButtonSize = 'small' | 'medium' | 'large' | 'jumbo';
 export type CounterButtonPosition = 'right' | 'center' | 'left' | 'float';
-export type OrientationLockMode = 'auto' | 'portrait' | 'landscape';
-export type ThemeStyle = 'classic' | 'modern-glow' | 'anime-flat';
+export type ThemeStyle = 'classic' | 'modern-glow' | 'retro';
 
 export interface AppSettings {
   theme: 'dark' | 'light';
   themeStyle: ThemeStyle;
-  orientationLock: OrientationLockMode;
   keepAwake: boolean;
   fullscreen: boolean;
   
@@ -59,9 +64,14 @@ export interface AppSettings {
   autoExpandDalil: boolean;
   
   // Font sizes
-  arabicFontSize: number; // 24 to 48 px
+  arabicFontSize: number; // 22 to 44 px
   latinFontSize: number;  // 13 to 22 px
   
-  // Carousel
+  // Carousel & Nasehat
   carouselInterval: number; // seconds, default 5
+  googleSheetUrl: string;   // Google Spreadsheet CSV URL for dynamic flyers
+  
+  // Reminders
+  remindersEnabled: boolean;
+  reminders: ReminderItem[];
 }
